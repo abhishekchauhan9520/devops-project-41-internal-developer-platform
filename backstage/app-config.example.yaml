@@ -1,0 +1,30 @@
+app:
+  title: DevOps Internal Developer Platform
+  baseUrl: http://localhost:3000
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+
+catalog:
+  locations:
+    - type: file
+      target: ./backstage/catalog.yaml
+
+scaffolder:
+  defaultAuthor:
+    name: Platform Engineering
+    email: platform@example.com
+
+techdocs:
+  builder: external
+  publisher:
+    type: local
+  generator:
+    runIn: docker
+
+integrations:
+  github:
+    - host: github.com
+      # Configure credentials through the Backstage deployment secret store.
