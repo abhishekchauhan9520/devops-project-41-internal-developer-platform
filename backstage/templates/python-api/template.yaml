@@ -1,0 +1,51 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: python-api
+  title: Python API Service
+  description: Create a production-ready Python API with CI, Docker, Kubernetes, catalog metadata, and TechDocs.
+spec:
+  owner: group:platform
+  type: service
+  parameters:
+    - title: Service information
+      required: [component_id, description, owner, lifecycle]
+      properties:
+        component_id:
+          title: Component ID
+          type: string
+          pattern: '^[a-z0-9-]+$'
+        description:
+          title: Description
+          type: string
+        owner:
+          title: Owner
+          type: string
+          default: group:platform
+        lifecycle:
+          title: Lifecycle
+          type: string
+          enum: [experimental, production]
+          default: experimental
+  steps:
+    - id: fetch
+      name: Fetch skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          component_id: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          lifecycle: ${{ parameters.lifecycle }}
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=${{ user.entity.metadata.name }}&repo=${{ parameters.component_id }}
+        defaultBranch: main
+    - id: register
+      name: Register component
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
