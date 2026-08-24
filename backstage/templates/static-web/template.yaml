@@ -1,0 +1,45 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: static-web
+  title: Static Web Service
+  description: Create a containerized static web service with CI, Kubernetes, catalog metadata, and TechDocs.
+spec:
+  owner: group:platform
+  type: website
+  parameters:
+    - title: Service information
+      required: [component_id, description, owner]
+      properties:
+        component_id:
+          title: Component ID
+          type: string
+          pattern: '^[a-z0-9-]+$'
+        description:
+          title: Description
+          type: string
+        owner:
+          title: Owner
+          type: string
+          default: group:platform
+  steps:
+    - id: fetch
+      name: Fetch skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          component_id: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=${{ user.entity.metadata.name }}&repo=${{ parameters.component_id }}
+        defaultBranch: main
+    - id: register
+      name: Register component
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
